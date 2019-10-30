@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"k8s.io/kubernetes/pkg/scheduler/api"
+	framework "k8s.io/kubernetes/pkg/scheduler/framework/v1alpha1"
 )
 
 func TestValidatePolicy(t *testing.T) {
@@ -52,7 +53,7 @@ func TestValidatePolicy(t *testing.T) {
 		},
 		{
 			name:     "policy weight exceeds maximum",
-			policy:   api.Policy{Priorities: []api.PriorityPolicy{{Name: "WeightPriority", Weight: api.MaxWeight}}},
+			policy:   api.Policy{Priorities: []api.PriorityPolicy{{Name: "WeightPriority", Weight: framework.MaxWeight}}},
 			expected: errors.New("Priority WeightPriority should have a positive weight applied to it or it has overflown"),
 		},
 		{
@@ -100,6 +101,26 @@ func TestValidatePolicy(t *testing.T) {
 					{URLPrefix: "http://127.0.0.1:8081/extender", ManagedResources: []api.ExtenderManagedResource{{Name: "kubernetes.io/foo"}}},
 				}},
 			expected: errors.New("kubernetes.io/foo is an invalid extended resource name"),
+		},
+		{
+			name: "invalid redeclared custom predicate",
+			policy: api.Policy{
+				Predicates: []api.PredicatePolicy{
+					{Name: "customPredicate1", Argument: &api.PredicateArgument{ServiceAffinity: &api.ServiceAffinity{Labels: []string{"label1"}}}},
+					{Name: "customPredicate2", Argument: &api.PredicateArgument{ServiceAffinity: &api.ServiceAffinity{Labels: []string{"label2"}}}},
+				},
+			},
+			expected: errors.New("Predicate 'customPredicate2' redeclares custom predicate 'ServiceAffinity', from:'customPredicate1'"),
+		},
+		{
+			name: "invalid redeclared custom priority",
+			policy: api.Policy{
+				Priorities: []api.PriorityPolicy{
+					{Name: "customPriority1", Weight: 1, Argument: &api.PriorityArgument{ServiceAntiAffinity: &api.ServiceAntiAffinity{Label: "label1"}}},
+					{Name: "customPriority2", Weight: 1, Argument: &api.PriorityArgument{ServiceAntiAffinity: &api.ServiceAntiAffinity{Label: "label2"}}},
+				},
+			},
+			expected: errors.New("Priority 'customPriority2' redeclares custom priority 'ServiceAntiAffinity', from:'customPriority1'"),
 		},
 	}
 

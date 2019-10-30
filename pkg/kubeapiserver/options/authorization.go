@@ -55,10 +55,9 @@ func (s *BuiltInAuthorizationOptions) Validate() []error {
 		allErrors = append(allErrors, fmt.Errorf("at least one authorization-mode must be passed"))
 	}
 
-	allowedModes := sets.NewString(authzmodes.AuthorizationModeChoices...)
 	modes := sets.NewString(s.Modes...)
 	for _, mode := range s.Modes {
-		if !allowedModes.Has(mode) {
+		if !authzmodes.IsValidAuthorizationMode(mode) {
 			allErrors = append(allErrors, fmt.Errorf("authorization-mode %q is not a valid mode", mode))
 		}
 		if mode == authzmodes.ModeABAC {
@@ -94,7 +93,7 @@ func (s *BuiltInAuthorizationOptions) AddFlags(fs *pflag.FlagSet) {
 		strings.Join(authzmodes.AuthorizationModeChoices, ",")+".")
 
 	fs.StringVar(&s.PolicyFile, "authorization-policy-file", s.PolicyFile, ""+
-		"File with authorization policy in csv format, used with --authorization-mode=ABAC, on the secure port.")
+		"File with authorization policy in json line by line format, used with --authorization-mode=ABAC, on the secure port.")
 
 	fs.StringVar(&s.WebhookConfigFile, "authorization-webhook-config-file", s.WebhookConfigFile, ""+
 		"File with webhook configuration in kubeconfig format, used with --authorization-mode=Webhook. "+

@@ -17,10 +17,11 @@ limitations under the License.
 package fake
 
 import (
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	schedulercache "k8s.io/kubernetes/pkg/scheduler/cache"
-	schedulerinternalcache "k8s.io/kubernetes/pkg/scheduler/internal/cache"
+	internalcache "k8s.io/kubernetes/pkg/scheduler/internal/cache"
+	schedulerlisters "k8s.io/kubernetes/pkg/scheduler/listers"
+	nodeinfosnapshot "k8s.io/kubernetes/pkg/scheduler/nodeinfo/snapshot"
 )
 
 // Cache is used for testing
@@ -74,8 +75,8 @@ func (c *Cache) UpdateNode(oldNode, newNode *v1.Node) error { return nil }
 // RemoveNode is a fake method for testing.
 func (c *Cache) RemoveNode(node *v1.Node) error { return nil }
 
-// UpdateNodeNameToInfoMap is a fake method for testing.
-func (c *Cache) UpdateNodeNameToInfoMap(infoMap map[string]*schedulercache.NodeInfo) error {
+// UpdateNodeInfoSnapshot is a fake method for testing.
+func (c *Cache) UpdateNodeInfoSnapshot(nodeSnapshot *nodeinfosnapshot.Snapshot) error {
 	return nil
 }
 
@@ -83,14 +84,21 @@ func (c *Cache) UpdateNodeNameToInfoMap(infoMap map[string]*schedulercache.NodeI
 func (c *Cache) List(s labels.Selector) ([]*v1.Pod, error) { return nil, nil }
 
 // FilteredList is a fake method for testing.
-func (c *Cache) FilteredList(filter schedulerinternalcache.PodFilter, selector labels.Selector) ([]*v1.Pod, error) {
+func (c *Cache) FilteredList(filter schedulerlisters.PodFilter, selector labels.Selector) ([]*v1.Pod, error) {
 	return nil, nil
 }
 
 // Snapshot is a fake method for testing
-func (c *Cache) Snapshot() *schedulerinternalcache.Snapshot {
-	return &schedulerinternalcache.Snapshot{}
+func (c *Cache) Snapshot() *internalcache.Snapshot {
+	return &internalcache.Snapshot{}
 }
 
-// NodeTree is a fake method for testing.
-func (c *Cache) NodeTree() *schedulerinternalcache.NodeTree { return nil }
+// GetNodeInfo is a fake method for testing.
+func (c *Cache) GetNodeInfo(nodeName string) (*v1.Node, error) {
+	return nil, nil
+}
+
+// ListNodes is a fake method for testing.
+func (c *Cache) ListNodes() []*v1.Node {
+	return nil
+}
